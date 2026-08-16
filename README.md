@@ -1,6 +1,6 @@
 # 💳 Desafio Completo — Sistema Financeiro (Boletos, Hexagonal, Escala)
 
-Quarto repositório da série, inspirado no artigo [**"Como eu construiria uma aplicação financeira com Java, Spring e AWS para suportar 1 milhão de requests por minuto"**](https://www.linkedin.com/pulse/como-eu-construiria-uma-aplica%C3%A7%C3%A3o-financeira-com-java-cleyton-chagas-9dr1f/), de Cleyton Chagas. Continua a numeração dos repositórios anteriores (Parte 1 termina na Parte 8 + Extras, Parte 2 vai até a Parte 14 + Extras, Parte 3 vai até a Parte 21) — este repositório começa na **Parte 22**.
+Projeto novo e independente, sem relação de numeração com os outros 3 repositórios da série — inspirado no artigo [**"Como eu construiria uma aplicação financeira com Java, Spring e AWS para suportar 1 milhão de requests por minuto"**](https://www.linkedin.com/pulse/como-eu-construiria-uma-aplica%C3%A7%C3%A3o-financeira-com-java-cleyton-chagas-9dr1f/), de Cleyton Chagas. Diferente dos anteriores (que usam dado de pagamento fictício), este integra de verdade com a API de boletos da Tecnospeed — os DTOs precisam refletir o contrato real da API, não um formato inventado.
 
 ## 🎯 Sobre este desafio
 
@@ -18,8 +18,8 @@ Não vamos atingir 16.667 req/s de verdade, e é importante entender por quê an
 
 O que vamos fazer, que é a distinção que o próprio artigo defende no fim ("arquitetura é a hipótese, teste de carga mostra o limite"):
 
-* **Teste de carga (volume)** — Parte 29, roda contra o **seu próprio** `payment-service` local, usando um adaptador **stub** de boleto (sem bater na Tecnospeed). Mede o teto real da sua máquina, seja qual for — o número que sair é o dado valioso, não "1 milhão".
-* **Teste de corretude (comportamento)** — Parte 30, poucas dezenas de chamadas **reais** à Tecnospeed, focado em provar que idempotência e tratamento de erro funcionam contra uma API real e imprevisível — volume não é o ponto aqui.
+* **Teste de carga (volume)** — Parte 8, roda contra o **seu próprio** `payment-service` local, usando um adaptador **stub** de boleto (sem bater na Tecnospeed). Mede o teto real da sua máquina, seja qual for — o número que sair é o dado valioso, não "1 milhão".
+* **Teste de corretude (comportamento)** — Parte 9, poucas dezenas de chamadas **reais** à Tecnospeed, focado em provar que idempotência e tratamento de erro funcionam contra uma API real e imprevisível — volume não é o ponto aqui.
 
 WAF e ECS/Fargate reais (serviços pagos até em ferramentas de emulação como LocalStack Pro) ficam só teóricos; Route53 é usado de verdade via LocalStack Community (grátis). WAF na prática vira um filtro de rate-limiting escrito por você; ECS/Fargate vira Kubernetes local (Minikube/Kind), reaproveitando o que já está planejado no CI/CD da Parte 2.
 
@@ -29,7 +29,7 @@ A credencial da API da Tecnospeed (mesmo de homologação) **nunca** vai pro Git
 
 ---
 
-## 🧩 PARTE 22 — Fundamentos de Arquitetura Hexagonal (Ports & Adapters)
+## 🧩 PARTE 1 — Fundamentos de Arquitetura Hexagonal (Ports & Adapters)
 
 ### 🎯 Objetivo
 
@@ -62,11 +62,11 @@ Entender Hexagonal não só na teoria, mas reestruturando um `payment-service` m
 
 ---
 
-## 💳 PARTE 23 — Payment Service completo (Idempotency Key + Boleto real via Tecnospeed)
+## 💳 PARTE 2 — Payment Service completo (Idempotency Key + Boleto real via Tecnospeed)
 
 ### 🎯 Objetivo
 
-Aplicar tudo que já foi aprendido no repositório 1 (Idempotency Key, Strategy, Factory) dentro da estrutura hexagonal da Parte 22 — e, pela primeira vez na série, integrar com uma API financeira real.
+Aplicar tudo que já foi aprendido em outro repositório da série (Idempotency Key, Strategy, Factory) dentro da estrutura hexagonal da Parte 1 — e, pela primeira vez, integrar com uma API financeira real.
 
 ### 🧪 Desafio
 
@@ -94,7 +94,7 @@ Aplicar tudo que já foi aprendido no repositório 1 (Idempotency Key, Strategy,
 
 ---
 
-## 🏦 PARTE 24 — Account Service
+## 🏦 PARTE 3 — Account Service
 
 ### 🎯 Objetivo
 
@@ -118,7 +118,7 @@ Modelar o domínio de contas/saldo como um segundo serviço, e resolver comunica
 
 ---
 
-## 🌐 PARTE 25 — Proxy-BFF + Auth-ACL
+## 🌐 PARTE 4 — Proxy-BFF + Auth-ACL
 
 ### 🎯 Objetivo
 
@@ -141,7 +141,7 @@ Completar os 4 serviços do artigo original: um ponto de entrada único (BFF) e 
 
 ---
 
-## ⚡ PARTE 26 — Cache com Redis
+## ⚡ PARTE 5 — Cache com Redis
 
 ### 🎯 Objetivo
 
@@ -164,7 +164,7 @@ Reduzir leitura desnecessária no banco pra dados consultados com frequência (e
 
 ---
 
-## 📨 PARTE 27 — Mensageria Assíncrona (Notificação + Analytics)
+## 📨 PARTE 6 — Mensageria Assíncrona (Notificação + Analytics)
 
 ### 🎯 Objetivo
 
@@ -185,7 +185,7 @@ Desacoplar o que não precisa bloquear a resposta do pagamento — reaproveitand
 
 ---
 
-## 🔭 PARTE 28 — Observabilidade com OpenTelemetry + OTEL Collector
+## 🔭 PARTE 7 — Observabilidade com OpenTelemetry + OTEL Collector
 
 ### 🎯 Objetivo
 
@@ -211,7 +211,7 @@ Rastrear uma requisição de ponta a ponta através dos múltiplos serviços —
 
 ---
 
-## 🚀 PARTE 29 — Teste de Carga Real (contra o próprio sistema)
+## 🚀 PARTE 8 — Teste de Carga Real (contra o próprio sistema)
 
 ### 🎯 Objetivo
 
@@ -233,7 +233,7 @@ Medir o teto real de throughput da sua máquina — não o "1 milhão" teórico 
 
 1. Qual foi o teto real de throughput que sua máquina aguentou antes do p99 disparar?
 2. O que começou a saturar primeiro quando a carga aumentou — CPU, pool de conexão do banco, memória? Como você descobriu isso?
-3. Por que usar um stub pro teste de volume e a API real só pra poucas chamadas de corretude (Parte 30) — o que aconteceria se você invertesse isso?
+3. Por que usar um stub pro teste de volume e a API real só pra poucas chamadas de corretude (Parte 9) — o que aconteceria se você invertesse isso?
 
 ### 🎯 Avaliação (0 a 10)
 
@@ -243,7 +243,7 @@ Medir o teto real de throughput da sua máquina — não o "1 milhão" teórico 
 
 ---
 
-## ✅ PARTE 30 — Corretude com API Real da Tecnospeed (baixo volume)
+## ✅ PARTE 9 — Corretude com API Real da Tecnospeed (baixo volume)
 
 ### 🎯 Objetivo
 
@@ -267,11 +267,11 @@ Provar que idempotência e tratamento de erro funcionam contra uma API real e im
 
 ---
 
-## 📊 PARTE 31 — SLOs, Dashboards e p95/p99
+## 📊 PARTE 10 — SLOs, Dashboards e p95/p99
 
 ### 🎯 Objetivo
 
-Transformar os números da Parte 29 num SLO de verdade, com dashboard visível — igual ao raciocínio do artigo original.
+Transformar os números da Parte 8 num SLO de verdade, com dashboard visível — igual ao raciocínio do artigo original.
 
 ### 🧪 Desafio
 
@@ -295,7 +295,7 @@ Transformar os números da Parte 29 num SLO de verdade, com dashboard visível �
 
 ### 🎯 Objetivo
 
-Aplicar o raciocínio de custo do artigo aos **seus** números reais medidos na Parte 29 — não ao "1 milhão" teórico.
+Aplicar o raciocínio de custo do artigo aos **seus** números reais medidos na Parte 8 — não ao "1 milhão" teórico.
 
 ### 🧪 Desafio
 
