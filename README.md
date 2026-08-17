@@ -215,31 +215,39 @@ Rastrear uma requisição de ponta a ponta através dos múltiplos serviços —
 
 ### 🎯 Objetivo
 
-Medir o teto real de throughput da sua máquina — não o "1 milhão" teórico do artigo — usando jornadas realistas em vez de um único endpoint martelado.
+Não é medir "1 milhão" — é achar o teto **real** da sua infraestrutura e empurrar esse teto o máximo possível, de forma iterativa: mede → identifica o gargalo → ajusta essa peça → mede de novo. O JMeter em si consegue gerar volume alto; o que limita é o lado do servidor (mesmo o artigo original mostra o p99 disparando perto de 17k req/s, com toda uma infraestrutura de cluster por trás — aqui, numa máquina só, o teto chega bem antes disso).
 
 ### 🧪 Desafio
 
 * Cria um adaptador **stub** de `BoletoGatewayPort` só pra esse teste (não bate na Tecnospeed em volume)
 * Monta no JMeter as 3 jornadas do artigo, com a mesma distribuição: 60% consulta, 25% pagamento, 15% transferência
+* **Roda o JMeter numa máquina separada do `payment-service`** (o segundo computador), em **modo não-GUI** (`jmeter -n -t teste.jmx`) — GUI mode é pesado demais e mente sobre o resultado, e gerar carga na mesma máquina que recebe a carga contamina a medição
 * Aplica carga com ramp-up gradual (aumento progressivo, não um salto direto pro máximo)
-* Documenta os números reais: throughput, p95, p99, taxa de erro, em cada patamar de carga testado
+* **Processo iterativo de otimização** — depois da primeira rodada, ataca o gargalo que apareceu primeiro e mede de novo. Alavancas reais, nessa ordem de impacto provável:
+  1. Tamanho do pool de conexão do HikariCP (o padrão do Spring Boot, 10, satura rápido)
+  2. Separação leitura/escrita — a consulta (60%, cacheada via Redis da Parte 5) tende a parar de ser gargalo depois do cache esquentar; pagamento/transferência (40%, `INSERT` real com checagem de índice único) é onde o teto de verdade costuma aparecer
+  3. Heap/GC da JVM — pausas de coleta aparecem no p99, não na média
+* Documenta cada rodada: o que mudou, o que melhorou, o que não melhorou
 
 ### 🚨 Regras
 
 * **Nunca gerar volume de carga contra a API real da Tecnospeed** — só contra o stub
 * Números têm que ser medidos de verdade (JMeter rodando), não estimados
+* Load generator e servidor em máquinas separadas — não vale medir os dois competindo pelo mesmo hardware
 
 ### ❓ Perguntas
 
-1. Qual foi o teto real de throughput que sua máquina aguentou antes do p99 disparar?
-2. O que começou a saturar primeiro quando a carga aumentou — CPU, pool de conexão do banco, memória? Como você descobriu isso?
-3. Por que usar um stub pro teste de volume e a API real só pra poucas chamadas de corretude (Parte 9) — o que aconteceria se você invertesse isso?
+1. Qual foi o teto real de throughput que você conseguiu depois de todas as rodadas de otimização — e quanto ele melhorou entre a primeira e a última rodada?
+2. Em cada rodada, o que estava saturando primeiro (CPU, pool de conexão, banco, GC)? Como você identificou isso (que métrica/log te mostrou)?
+3. Depois de otimizar tudo que dava pra otimizar numa única instância, o que faria o teto subir de verdade — mais tuning, ou mais instâncias (horizontal)? Por quê?
+4. Por que usar um stub pro teste de volume e a API real só pra poucas chamadas de corretude (Parte 9) — o que aconteceria se você invertesse isso?
 
 ### 🎯 Avaliação (0 a 10)
 
-* Teste de carga real, com jornadas realistas (não só `POST` bruto)
+* Teste de carga real, com jornadas realistas (não só `POST` bruto), load generator em máquina separada
+* Pelo menos 2 rodadas de otimização documentadas (antes/depois de atacar um gargalo identificado)
 * Números documentados com evidência (gráficos/tabelas do JMeter)
-* Diagnóstico correto do gargalo real da sua máquina
+* Diagnóstico correto do gargalo real em cada rodada, e entendimento de quando tuning vertical para de ajudar
 
 ---
 
