@@ -299,6 +299,41 @@ Transformar os números da Parte 8 num SLO de verdade, com dashboard visível �
 
 ---
 
+## 🖥️ PARTE 11 — Micro-Frontends (Tela Real de Testes)
+
+### 🎯 Objetivo
+
+Construir uma interface real pro sistema financeiro, usando arquitetura de micro-frontends de verdade (múltiplos frontends independentes, buildados e deployados separadamente, compostos em tempo de execução) — não só "pra ter uma tela", mas pra provar visualmente o sistema funcionando de ponta a ponta. Roda na outra máquina, consumindo o `proxy-bff` pela rede — mesmo espírito de separar quem gera/consome carga de quem processa, que já vale a pena aqui também.
+
+### 🧪 Desafio
+
+* Cria um **shell** (app host) em Angular, responsável só por orquestrar e compor as telas — sem lógica de negócio própria
+* Cria pelo menos **2 micro-frontends independentes**, cada um com seu próprio build/deploy: ex. `mfe-pagamentos` (criar/consultar pagamentos) e `mfe-conta` (ver saldo/extrato)
+* Usa **Module Federation** (via `@angular-architects/module-federation`) pra compor os MFEs dentro do shell em **tempo de execução**, não em tempo de build
+* Roda o shell + os MFEs na outra máquina, consumindo o `proxy-bff` (Parte 4) pela rede local
+* **Teste real obrigatório**: um fluxo completo pela tela — criar um pagamento PIX pela interface, ver ele aparecer no extrato — e confirma no banco que o dado bate com o que a tela mostrou
+
+### 🚨 Regras
+
+* Os MFEs precisam ser **genuinamente buildados e deployados separadamente** — um único projeto Angular com módulos internos (lazy loading comum) não conta como micro-frontend, é só modularização normal
+* O shell não pode ter lógica de negócio — só orquestra e compõe
+
+### ❓ Perguntas
+
+1. Qual a diferença real entre "módulos dentro do mesmo projeto Angular" (lazy loading normal) e micro-frontends de verdade?
+2. O que é Module Federation, e como ele permite compor código de builds separados em tempo de execução, não em tempo de build?
+3. Se o `mfe-pagamentos` quebrar/cair, o `mfe-conta` continua funcionando? Isso é verdade na sua implementação — testou de propósito?
+4. Qual o trade-off real de micro-frontends comparado a um único app Angular — vale a pena pra esse projeto (poucas telas, um dev só), ou é principalmente uma decisão de escala de time (times diferentes cuidando de partes diferentes da UI)? Seja honesto na resposta, mesmo que a conclusão seja "não valeria a pena aqui".
+
+### 🎯 Avaliação (0 a 10)
+
+* Pelo menos 2 MFEs genuinamente independentes, compostos via Module Federation
+* Shell funcionando como orquestrador puro, sem lógica de negócio
+* Fluxo real testado (criar pagamento pela tela, confirmar no banco)
+* Entendimento honesto do trade-off — inclusive reconhecer se a arquitetura é overkill pra esse caso específico
+
+---
+
 ## 💵 PARTE EXTRA — Análise de Custo
 
 ### 🎯 Objetivo
