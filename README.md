@@ -154,6 +154,39 @@ Com `payment-service` e `account-service` prontos, agora existem **2 consumidore
 
 ---
 
+## 📦 PARTE 3.2 — EXTRA: Nexus (Registro Self-Hosted)
+
+### 🎯 Objetivo
+
+Provar que trocar de registro de artefatos é uma mudança de **configuração**, não de código — sobe um Nexus local via Docker, publica a mesma lib da Parte 3.1 lá, e reconfigura os consumidores pra buscar de lá.
+
+### 🧪 Desafio
+
+* Sobe o Nexus localmente via Docker: `docker run -d -p 8081:8081 --name nexus sonatype/nexus3`
+* Configura um repositório Maven *hosted* no Nexus (pela interface web, `http://localhost:8081`)
+* Ajusta o `distributionManagement` da lib pra apontar pro Nexus local (em vez do GitHub Packages) e publica de novo (`mvn deploy`)
+* Ajusta o `<repository>` de `payment-service` **e** `account-service` pra buscar do Nexus em vez do GitHub Packages
+* **Prova real**: no log de build (`mvn dependency:tree` ou o próprio log de download do Maven), confirma que a dependência está vindo da URL do Nexus (`http://localhost:8081/...`), não mais do GitHub
+
+### 🚨 Regras
+
+* Não precisa apagar a versão publicada no GitHub Packages (Parte 3.1) — a ideia é provar que dá pra trocar de registro **sem mexer em uma linha sequer** do código da lib ou dos consumidores, só na URL/credencial
+* A prova de que a troca funcionou tem que vir de log/output real, não suposição
+
+### ❓ Perguntas
+
+1. O que mudou no código da lib ou dos consumidores pra trocar de GitHub Packages pra Nexus? O que isso confirma sobre o acoplamento entre a aplicação e onde ela busca dependências?
+2. Nexus, além de hospedar seu próprio artefato, também pode funcionar como proxy/cache do Maven Central pra toda a empresa — qual problema real isso resolve num time grande, com muitos builds acontecendo ao mesmo tempo?
+3. Numa empresa de verdade, normalmente se usa Nexus **ou** GitHub Packages, ou os dois convivem? Em que cenário faria sentido ter os dois ao mesmo tempo?
+
+### 🎯 Avaliação (0 a 10)
+
+* Nexus rodando localmente via Docker, com a lib publicada lá de verdade
+* Pelo menos 1 consumidor comprovadamente buscando do Nexus (log real, não suposição)
+* Entendimento de que trocar de registro é decisão de configuração, não de código
+
+---
+
 ## 🌐 PARTE 4 — Proxy-BFF + Auth-ACL
 
 ### 🎯 Objetivo
