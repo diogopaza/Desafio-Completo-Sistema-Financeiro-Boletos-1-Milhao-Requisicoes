@@ -118,6 +118,42 @@ Modelar o domínio de contas/saldo como um segundo serviço, e resolver comunica
 
 ---
 
+## 📦 PARTE 3.1 — EXTRA: Lib Compartilhada de Tratamento de Erro (Maven Registry)
+
+### 🎯 Objetivo
+
+Com `payment-service` e `account-service` prontos, agora existem **2 consumidores reais** pro mesmo problema: tratamento de erro em RFC 7807/`ProblemDetail`, igual ao que já foi construído no outro repositório da série (Parte 8). Extrai isso pra uma biblioteca própria, publicada de verdade — só faz sentido agora que existe reuso genuíno, não antes.
+
+### 🧪 Desafio
+
+* Cria um repositório Maven novo e separado (ex: `lib-tratamento-erro-spring`) contendo uma classe base reaproveitável (`GlobalExceptionHandler` ou um conjunto de builders de `ProblemDetail`) cobrindo os erros comuns: validação (`MethodArgumentNotValidException`), argumento inválido, tipo incompatível, e o genérico (`Exception.class`)
+* Configura `distributionManagement` no `pom.xml` da lib, apontando pro GitHub Packages
+* Publica a lib (`mvn deploy`) usando um **Personal Access Token** do GitHub, configurado no `settings.xml` local — nunca no `pom.xml`, nunca commitado
+* Em `payment-service` **e** `account-service`, adiciona a lib como dependência real (bloco `<repository>` + `<dependency>`, autenticado via `settings.xml`), removendo o código duplicado que cada um tinha próprio
+* **Teste real obrigatório**: sobe os 2 serviços, provoca o mesmo tipo de erro em cada um (ex: campo inválido), confirma que os dois devolvem exatamente o mesmo formato RFC 7807, vindo da mesma classe compartilhada
+
+### 🚨 Regras
+
+* Token do GitHub nunca vai pro Git — nem na lib, nem nos consumidores
+* Só conta como concluído se **2 serviços diferentes** estiverem consumindo a mesma versão publicada de verdade — 1 serviço só não prova reuso real
+* Se a lib mudar de versão, os consumidores devem conseguir atualizar só trocando o número da versão no `pom.xml`, sem copiar código de novo
+
+### ❓ Perguntas
+
+1. Qual a diferença entre publicar uma lib no Maven Central (público, sem autenticação pra baixar) e no GitHub Packages (exige token até pra leitura)? Por que uma empresa escolheria GitHub Packages mesmo assim?
+2. Por que o token de publicação/leitura fica no `settings.xml` da máquina, e nunca no `pom.xml` do projeto?
+3. Se você corrigir um bug na lib e publicar uma versão nova, os serviços que ainda usam a versão antiga são afetados automaticamente? O que isso ensina sobre versionamento semântico (SemVer)?
+4. Qual o risco de uma lib compartilhada crescer demais e virar um "monólito disfarçado" entre microsserviços — o que ela deveria (e não deveria) conter?
+
+### 🎯 Avaliação (0 a 10)
+
+* Lib publicada de verdade no GitHub Packages, com token configurado localmente (nunca commitado)
+* Pelo menos 2 serviços reais consumindo a mesma versão publicada
+* Teste real confirmando comportamento idêntico entre os 2 serviços
+* Entendimento de versionamento semântico e do risco de acoplamento excessivo numa lib compartilhada
+
+---
+
 ## 🌐 PARTE 4 — Proxy-BFF + Auth-ACL
 
 ### 🎯 Objetivo
